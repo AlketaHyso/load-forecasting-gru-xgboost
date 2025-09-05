@@ -1,0 +1,18 @@
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# Virtual envs
+.venv/
+.env/
+.envrc
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# If you decide to keep data out of git, uncomment below:
+# code/ost_data1.csv
