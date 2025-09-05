@@ -14,5 +14,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# If you decide to keep data out of git, uncomment below:
 # code/ost_data1.csv
+code/ost_data1.csv
+
