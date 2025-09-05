@@ -1,35 +1,18 @@
-# Code & Data for "Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models"
+# Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models
 
-This repository contains **four** Jupyter notebooks that all read from **`ost_data1.csv`** and save figures (600 dpi) in the **same folder** as the notebook files.
+This study compares the predictive abilities of **Gated Recurrent Unit (GRU)** neural networks, **Extreme Gradient Boosting (XGBoost)**, and a **combined GRU–XGBoost** approach for **24-hour ahead electrical load estimation**. The repository provides reproducible notebooks and the CSV dataset used to generate the results.
 
-## Notebooks (place them in `code/`)
-- `GRU.ipynb` — GRU model
-- `XGB.ipynb` — XGBoost model
-- `Hibrid.ipynb` — Hybrid with holiday features 
-- `GRUXGB.ipynb` — Hybrid GRU+XGBoost (without holiday features)
+## Repository contents
+- `code/GRU.ipynb` — GRU model
+- `code/XGB.ipynb` — XGBoost model
+- `code/Hibrid.ipynb` — Hybrid **with** holiday features
+- `code/GRUXGB.ipynb` — Hybrid GRU+XGBoost (**without** holiday features)
+- `code/ost_data1.csv` — Dataset used by all notebooks (~721 KB)
 
-> All four notebooks expect the dataset file **`ost_data1.csv`** in the **same folder** (`code/`).
+Figures produced during execution are saved in `code/` as `.png` at **dpi=600**.
 
 ## Quick start
-```bash
-# Option A: pip
-pip install -r requirements.txt
-
-# Open Jupyter and run the notebooks in order
-# (Optional order) GRU -> XGB -> Hibrid -> GRUXGB
-```
-
-## Data
-- Path: `code/ost_data1.csv` (CSV size example: ~721 KB)
-
-## Results
-- Figures are saved in `code/` as `.png` with `dpi=600`.
-
-## Citation
-If you use this code, please cite this repository. A `CITATION.cff` file is provided for GitHub's citation panel.
-If you archive on Zenodo, add the DOI here and to `CITATION.cff`:
-
-> DOI: 10.5281/zenodo.XXXXXXX
-
-## License
-Released under the MIT License — see `LICENSE`.
+- **Python**: 3.11 recommended
+- **Install dependencies**
+  ```bash
+  pip install -r requirements.txt
