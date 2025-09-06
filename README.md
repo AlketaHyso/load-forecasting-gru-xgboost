@@ -2,19 +2,20 @@ Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models
 
 This project compares Gated Recurrent Unit (GRU) neural networks, Extreme Gradient Boosting (XGBoost), and a residual-based GRU→XGBoost hybrid for 24-hour ahead electrical load forecasting. The repository provides reproducible notebooks; data are obtained by the user from the official source.
 
-Repository structure
+## Repository structure
+
+```text
 .
-├── code/
-│   ├── GRU.ipynb           # GRU for 24→24 forecasting
-│   ├── XGB.ipynb           # XGBoost baseline with engineered features
-│   ├── Hibrid.ipynb        # Residual-based Hybrid (with holiday features)
-│   ├── GRUXGB.ipynb        # Hybrid GRU+XGBoost (without holiday features)
-│   ├── Correct_Data.ipynb  # Pre-read fixes: header separators & trailing commas
-│   ├── Cleanning.ipynb     # Structural cleaning, continuity & targeted fixes (see below)
-│   └── ost_data_clean.csv  # Produced by Cleanning.ipynb
-├── requirements.txt
-└── README.md
-Figures produced by the notebooks are saved directly in code/ as .png at dpi=600.
+├─ code/
+│  ├─ GRU.ipynb                 # GRU for 24→24 forecasting
+│  ├─ XGB.ipynb                 # XGBoost baseline with engineered features
+│  ├─ Hibrid.ipynb              # Residual-based Hybrid (with holiday features)
+│  ├─ GRUXGB.ipynb              # Hybrid GRU+XGBoost (without holiday features)
+│  ├─ Correct_Data.ipynb        # Pre-read fixes: header separators & trailing commas
+│  ├─ Cleanning.ipynb           # Structural cleaning & continuity (see README)
+│  └─ ost_data_clean.csv        # Produced by Cleanning.ipynb
+├─ requirements.txt
+└─ README.md
 
 Methods at a glance
 GRU: sequence model on hourly load, calendar features, Fourier seasonality, optional cross-border exchanges; time-based split.
