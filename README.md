@@ -1,29 +1,106 @@
-# Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models
+Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models
 
-We compare the predictive abilities of **Gated Recurrent Unit (GRU)** neural networks, **Extreme Gradient Boosting (XGBoost)**, and a **combined GRU–XGBoost** approach for **24-hour ahead electrical load estimation**. The repository provides reproducible notebooks and the CSV dataset used to generate the results.
+This project compares Gated Recurrent Unit (GRU) neural networks, Extreme Gradient Boosting (XGBoost), and a residual-based GRU→XGBoost hybrid for 24-hour ahead electrical load forecasting. The repository provides reproducible notebooks; data are obtained by the user from the official source.
 
-## Repository contents
-- `code/GRU.ipynb` — GRU model
-- `code/XGB.ipynb` — XGBoost model
-- `code/Hibrid.ipynb` — Hybrid **with** holiday features
-- `code/GRUXGB.ipynb` — Hybrid GRU+XGBoost (**without** holiday features)
-- `code/ost_data_clean.csv` — Dataset used by all notebooks (~721 KB)
+Repository structure
+.
+├── code/
+│   ├── GRU.ipynb           # GRU for 24→24 forecasting
+│   ├── XGB.ipynb           # XGBoost baseline with engineered features
+│   ├── Hibrid.ipynb        # Residual-based Hybrid (with holiday features)
+│   ├── GRUXGB.ipynb        # Hybrid GRU+XGBoost (without holiday features)
+│   ├── Correct_Data.ipynb  # Pre-read fixes: header separators & trailing commas
+│   ├── Cleanning.ipynb     # Structural cleaning, continuity & targeted fixes (see below)
+│   └── ost_data_clean.csv  # Produced by Cleanning.ipynb
+├── requirements.txt
+└── README.md
+Figures produced by the notebooks are saved directly in code/ as .png at dpi=600.
 
-Figures produced during execution are saved in `code/` as `.png` at **dpi=600**.
+Methods at a glance
+GRU: sequence model on hourly load, calendar features, Fourier seasonality, optional cross-border exchanges; time-based split.
+XGBoost: tree model on the engineered tabular features.
+Hybrid (residual-based):
+Train GRU and generate forecasts
+Compute residuals (actual − forecast)
+Train XGBoost on residuals with the same horizon-aligned tabular features
+Final forecast = GRU forecast + XGBoost residual correction
+Metrics: MAE, RMSE, MAPE, R² on a held-out test set.
 
-## Quick start
-- **Python**: 3.11 recommended
-- **Install dependencies**
-  ```bash
-  pip install -r requirements.txt
-## Data
-Source: OST (Operatori i Sistemit të Transmetimit, Albania) — https://ost.al/  
+Quick start
+Python: 3.11 recommended
+
+Setup
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS/Linux
+# source .venv/bin/activate
+pip install -r requirements.txt
+
+Run the workflow
+Download data from OST (see Data) and save as:
+code/ost_data_raw.csv
+Manual corrections (performed by us before any notebook runs)
+To ensure data quality, we apply the following manual fixes to the raw file upfront:
+Total Load — 19 Dec 2024 10:00 had 49,248,784 MWh → replace with 1,122 MWh (median of 09:00 & 11:00).
+Total Production — 11 Jul 2024 10:00 had 32,408,672 MWh → replace with 922 MWh (average of 09:00 & 11:00).
+Save the edited file again as code/ost_data_raw.csv.
+
+Pre-read formatting (Correct_Data.ipynb)
+Replace commas in the header with ;
+Remove trailing commas at the end of each line
+Read the CSV using sep=";" only
+Output: code/ost_data.csv
+
+Cleaning & continuity (Cleanning.ipynb)
+This notebook performs structural cleaning and the targeted negative-load fix:
+Parse Data + Ora to hourly timestamps; sort chronologically
+Enforce numeric dtypes; standardize the column names used downstream
+Drop duplicate timestamps/rows; validate basic ranges (flags only)
+Ensure continuous hourly frequency; insert any missing hours
+Negative “Total Load” — morning of 18 Sep 2024: replace using the median from a centered ±14-day window (29 points), then apply short linear interpolation to keep the series continuous
+Output: code/ost_data_clean.csv (used by all modeling notebooks)
+
+Model notebooks
+
+Run GRU.ipynb → GRU forecasts + residuals
+Run XGB.ipynb → XGBoost baseline
+Run Hibrid.ipynb (with holidays) or GRUXGB.ipynb (without) → hybrid results
+
+Data
+Source: OST (Operatori i Sistemit të Transmetimit, Albania) — official portal: https://ost.al/
 Terms: © 2025 OST. All rights reserved.
-We do **not** redistribute OST data in this repository.  
-Please download the dataset from the official portal and place it next to the notebooks as:
-`code/ost_data_raw.csv`
+We do not redistribute OST data in this repository. Please obtain it directly from the portal.
 
-We use publicly available hourly data from the Albanian Transmission System Operator (OST) obtained from the Open Data portal, which spans from 23 February 2024 to 1 July 2025. The dataset was downloaded in .csv format. A single erroneous value of 49,248,784 MWh appeared on 19 December 2024 at 10:00, and was replaced with 1,122 MWh—the median of the same-day 09:00 and 11:00 load values(Change it).Similarly, the “Prodhimi Total” (Total Production) entry for 11 July 2024 at 10:00 recorded 32,408,672 MWh; we replaced this impossible value with 922 MWh, computed as the average of the same day’s 09:00 and 11:00 readings (Change it).
-Save the file as code/ost_data_raw.csv.
-Execute file Correct_Data.ipynb to clean the rows before reading; It replaces the commas in the header with “;” and remove trailing commas from each line, then read using sep=";" only. We have now the file code/ost_data.csv.  
-All instances of “Total Load” during morning hours of 18 September 2024, with negative values received replacement by using the median values from a ±14-day centered window that contained 29 data points. Linear interpolation was applied to smooth the corrected series for maintaining continuous time. These steps were implemented by executing file Cleanning.ipynb; the final file is code/ost_data_clean.csv
+Time span & format: Hourly operational data, 23 Feb 2024 – 1 Jul 2025, downloaded as CSV.
+
+Pipeline outputs:
+code/ost_data.csv — delimiter/row formatting normalized
+code/ost_data_clean.csv — cleaned, continuous hourly series
+
+Feature engineering (used in models)
+Calendar: hour, day of week, weekend flag, month
+Holidays (hybrid variant): AL/ME/XK/GR calendars
+Seasonality: Fourier terms (daily/weekly)
+Operations: cross-border physical exchanges and related OST fields
+Scaling: fit on train only; time-ordered train/val/test (e.g., 70/10/20)
+
+Reproducibility
+Time-based splits to avoid leakage
+Fixed random seeds where applicable (GRU/XGBoost)
+Plots saved deterministically at 600 dpi directly under code/
+
+Results & outputs
+
+Each notebook reports MAE, RMSE, MAPE, and R² on validation/test and writes high-resolution plots (saved in code/). Hybrid notebooks also export intermediate GRU residuals and corrected forecasts.
+
+License & attribution
+
+Code: MIT License (see LICENSE).
+
+Data: © 2025 OST. Rights remain with OST. Please download from the official source.
+
+How to cite
+
+OST — Operatori i Sistemit të Transmetimit (Albania), hourly operational data, 2024–2025.
+Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models (MIT License).
