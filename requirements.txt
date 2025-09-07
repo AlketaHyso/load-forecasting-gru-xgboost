@@ -1,7 +1,7 @@
 numpy>=1.26
 pandas>=2.2
 matplotlib>=3.8
-scikit-learn>=1.4
+scikit-learn==1.3.2
 xgboost>=3.0
 tensorflow>=2.16
 # holidays is used by some notebooks; the 'GRUXGB' (no-holidays) notebook can skip it
