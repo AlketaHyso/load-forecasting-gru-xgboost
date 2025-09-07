@@ -36,9 +36,37 @@ python -m venv .venv
 .venv\Scripts\activate
 # macOS/Linux
 # source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt jupyterlab
 
-Run the workflow
+Launch JupyterLab
+# With the virtual environment active:
+jupyter lab
+
+Model notebooks
+
+Run GRU.ipynb → GRU forecasts + residuals
+Run XGB.ipynb → XGBoost baseline
+Run Hibrid.ipynb (with holidays) or GRUXGB.ipynb (without) → hybrid results
+
+Data
+Source: OST (Operatori i Sistemit të Transmetimit, Albania) — official portal: https://ost.al/
+Time span & format: Hourly operational data, 23 Feb 2024 – 1 Jul 2025, downloaded as CSV.
+
+Pipeline outputs:
+code/ost_data.csv — delimiter/row formatting normalized
+code/ost_data_clean.csv — cleaned, continuous hourly series
+
+Feature engineering (used in models)
+Calendar: hour, day of week, weekend flag, month
+Holidays (hybrid variant): AL/ME/XK/GR calendars
+Seasonality: Fourier terms (daily/weekly)
+Operations: cross-border physical exchanges and related OST fields
+Scaling: fit on train only; time-ordered train/val/test (e.g., 70/10/20)
+
+Reproducibility
+Time-based splits to avoid leakage
+Fixed random seeds where applicable (GRU/XGBoost)
+Plots saved deterministically at 600 dpi directly under code/
 Download data from OST (see Data) and save as:
 code/ost_data_raw.csv
 Manual corrections (performed by us before any notebook runs)
@@ -61,39 +89,9 @@ Drop duplicate timestamps/rows; validate basic ranges (flags only)
 Ensure continuous hourly frequency; insert any missing hours
 Negative “Total Load” — morning of 18 Sep 2024: replace using the median from a centered ±14-day window (29 points), then apply short linear interpolation to keep the series continuous
 Output: code/ost_data_clean.csv (used by all modeling notebooks)
-
-Model notebooks
-
-Run GRU.ipynb → GRU forecasts + residuals
-Run XGB.ipynb → XGBoost baseline
-Run Hibrid.ipynb (with holidays) or GRUXGB.ipynb (without) → hybrid results
-
-Data
-Source: OST (Operatori i Sistemit të Transmetimit, Albania) — official portal: https://ost.al/
-Terms: © 2025 OST. All rights reserved.
-We do not redistribute OST data in this repository. Please obtain it directly from the portal.
-
-Time span & format: Hourly operational data, 23 Feb 2024 – 1 Jul 2025, downloaded as CSV.
-
-Pipeline outputs:
-code/ost_data.csv — delimiter/row formatting normalized
-code/ost_data_clean.csv — cleaned, continuous hourly series
-
-Feature engineering (used in models)
-Calendar: hour, day of week, weekend flag, month
-Holidays (hybrid variant): AL/ME/XK/GR calendars
-Seasonality: Fourier terms (daily/weekly)
-Operations: cross-border physical exchanges and related OST fields
-Scaling: fit on train only; time-ordered train/val/test (e.g., 70/10/20)
-
-Reproducibility
-Time-based splits to avoid leakage
-Fixed random seeds where applicable (GRU/XGBoost)
-Plots saved deterministically at 600 dpi directly under code/
-
 Results & outputs
 
-Each notebook reports MAE, RMSE, MAPE, and R² on validation/test and writes high-resolution plots (saved in code/). Hybrid notebooks also export intermediate GRU residuals and corrected forecasts.
+
 
 License & attribution
 
