@@ -99,4 +99,5 @@ License & attribution
 Code: MIT License (see LICENSE).
 
 How to cite
+Data: OST — Operatori i Sistemit të Transmetimit (Albania), hourly operational data, 2024–2025. Rights: © 2025 OST. All rights reserved.
 Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models (MIT License).
