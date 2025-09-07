@@ -42,15 +42,41 @@ Launch JupyterLab
 # With the virtual environment active:
 jupyter lab
 
+Data
+code/ost_data_clean.csv
+
 Model notebooks
 
 Run GRU.ipynb → GRU forecasts + residuals
 Run XGB.ipynb → XGBoost baseline
-Run Hibrid.ipynb (with holidays) or GRUXGB.ipynb (without) → hybrid results
+Run Hibrid.ipynb (with holidays)
+Run GRUXGB.ipynb (without) → hybrid results
 
-Data
-Source: OST (Operatori i Sistemit të Transmetimit, Albania) — official portal: https://ost.al/
+Data Source
+Source: https://opendata.ost.al/
+OST (Operatori i Sistemit të Transmetimit, Albania) — official portal: https://ost.al/.
 Time span & format: Hourly operational data, 23 Feb 2024 – 1 Jul 2025, downloaded as CSV.
+
+Manual corrections (performed by us before any notebook runs)
+To ensure data quality, we apply the following manual fixes to the raw file upfront:
+Total Load (19 Dec 2024, 10:00) recorded an impossible value of 49,248,784 [MW/MWh]. It was replaced with 1,122 [MW/MWh], computed as the median of the adjacent 09:00 and 11:00 values.
+Total Production — 11 Jul 2024 10:00: 32,408,672 MWh → 922 MWh (average of 09:00 & 11:00).
+Output: code/ost_data_raw.csv.
+
+Pre-read formatting (Correct_Data.ipynb)
+Replace commas in the header with ;
+Remove trailing commas at the end of each line
+Read the CSV using sep=";" only
+Output: code/ost_data.csv
+
+Cleaning & continuity (Cleanning.ipynb)
+This notebook performs structural cleaning and the targeted negative-load fix:
+Parse Data + Ora to hourly timestamps; sort chronologically
+Enforce numeric dtypes; standardize the column names used downstream
+Drop duplicate timestamps/rows; validate basic ranges (flags only)
+Ensure continuous hourly frequency; insert any missing hours
+Negative “Total Load” — morning of 18 Sep 2024: replace using the median from a centered ±14-day window (29 points), then apply short linear interpolation to keep the series continuous
+Output: code/ost_data_clean.csv (used by all modeling notebooks)
 
 Pipeline outputs:
 code/ost_data.csv — delimiter/row formatting normalized
@@ -67,39 +93,10 @@ Reproducibility
 Time-based splits to avoid leakage
 Fixed random seeds where applicable (GRU/XGBoost)
 Plots saved deterministically at 600 dpi directly under code/
-Download data from OST (see Data) and save as:
-code/ost_data_raw.csv
-Manual corrections (performed by us before any notebook runs)
-To ensure data quality, we apply the following manual fixes to the raw file upfront:
-Total Load — 19 Dec 2024 10:00 had 49,248,784 MWh → replace with 1,122 MWh (median of 09:00 & 11:00).
-Total Production — 11 Jul 2024 10:00 had 32,408,672 MWh → replace with 922 MWh (average of 09:00 & 11:00).
-Save the edited file again as code/ost_data_raw.csv.
-
-Pre-read formatting (Correct_Data.ipynb)
-Replace commas in the header with ;
-Remove trailing commas at the end of each line
-Read the CSV using sep=";" only
-Output: code/ost_data.csv
-
-Cleaning & continuity (Cleanning.ipynb)
-This notebook performs structural cleaning and the targeted negative-load fix:
-Parse Data + Ora to hourly timestamps; sort chronologically
-Enforce numeric dtypes; standardize the column names used downstream
-Drop duplicate timestamps/rows; validate basic ranges (flags only)
-Ensure continuous hourly frequency; insert any missing hours
-Negative “Total Load” — morning of 18 Sep 2024: replace using the median from a centered ±14-day window (29 points), then apply short linear interpolation to keep the series continuous
-Output: code/ost_data_clean.csv (used by all modeling notebooks)
-Results & outputs
-
-
 
 License & attribution
 
 Code: MIT License (see LICENSE).
 
-Data: © 2025 OST. Rights remain with OST. Please download from the official source.
-
 How to cite
-
-OST — Operatori i Sistemit të Transmetimit (Albania), hourly operational data, 2024–2025.
 Day-Ahead Load Forecasting with GRU, XGBoost, and Hybrid Models (MIT License).
